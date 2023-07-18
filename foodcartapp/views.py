@@ -67,9 +67,12 @@ def register_order(request):
         data = request.data
     except ValueError as err:
         print(f'Произошла ошибка {err}')
-    if not data['products']:
-        print('Невозможно сделать пустой заказ')
-        return Response({})
+    try:
+        products = data['products']
+    except KeyError:
+        return Response({'error': 'products: Обязательное поле'})
+    if not type(products) == list or not products:
+        return Response({'error': 'products должен быть ненулевым или пустым списком'})
     address = data['address']
     first_name = data['firstname']
     last_name = data['lastname']
