@@ -148,6 +148,7 @@ class Order(models.Model):
     )
     phone = PhoneNumberField(
         'телефон',
+        region='RU',
     )
 
     class Meta:
