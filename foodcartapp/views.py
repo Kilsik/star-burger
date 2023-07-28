@@ -8,6 +8,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 
 from .models import Product, Order, OrderProducts
 
@@ -64,12 +65,8 @@ def product_list_api(request):
     })
 
 
-@api_view(['POST'])
-def register_order(request):
-    try:
-        data = request.data
-    except ValueError as err:
-        print(f'Произошла ошибка {err}')
+def order_validation(data):
+    errors = []
 
     order_kyes = ['products', 'firstname', 'lastname', 'phonenumber', 'address']
     err_keys = []
@@ -80,7 +77,7 @@ def register_order(request):
             err_keys.append(key)
             exist_key_error = True
     if exist_key_error:
-        return Response({'error': f'Отсутствуют обязательные поля: {err_keys}'}, status=status.HTTP_204_NO_CONTENT)
+        errors.append({'error': f'Отсутствуют обязательные поля: {err_keys}'})
 
     err_type = []
     exist_err_type =False
@@ -90,7 +87,11 @@ def register_order(request):
             err_type.append(key)
             exist_err_type = True
     if exist_err_type:
-        return Response({'error': f'Несоответствие типа данных (не строка) в полях: {err_type}'}, status=status.HTTP_204_NO_CONTENT)
+        errors.append({'error': f'Несоответствие типа данных (не строка) в полях: {err_type}'})
+
+    products = data['products']
+    if not isinstance(products, list) or not products:
+        errors.append({'error': 'products не может быть нулевым или пустым списком'})
 
     err_data = []
     exist_data_error = False
@@ -100,19 +101,31 @@ def register_order(request):
             err_data.append(key)
             exist_data_error = True
     if exist_data_error:
-        return Response({'error': f'Эти поля не могут быть пустыми: {err_data}'}, status=status.HTTP_204_NO_CONTENT)
+        errors.append({'error': f'Эти поля не могут быть пустыми: {err_data}'})
 
-    products = data['products']
-    if not isinstance(products, list) or not products:
-        return Response({'error': 'products не может быть нулевым или пустым списком'}, status=status.HTTP_204_NO_CONTENT)
+    for product in data['products']:
+        product_id = product['product']
+        if product_id not in list(Product.objects.all().values_list('id', flat=True)):
+            errors.append({'error': f'products: недопустимый первичный ключ {product_id}'})
+    if not phonenumbers.is_valid_number(phonenumbers.parse(data['phonenumber'], region='Russia')):
+        errors.append({'error': 'phonenumber: введен некорректный номер телефона'})
+    
+    if errors:
+        raise ValidationError(errors)
 
+
+@api_view(['POST'])
+def register_order(request):
+    try:
+        data = request.data
+    except ValueError as err:
+        raise ValidationError(f'Произошла ошибка {err}')
+
+    order_validation(data)
     address = data['address']
     first_name = data['firstname']
     last_name = data['lastname']
-    phone = PhoneNumber.from_string(data['phonenumber'], region='RU').as_e164
-    phonenumber = phonenumbers.parse(phone, region='Russia')
-    if not phonenumbers.is_valid_number(phonenumber):
-        return Response({'error': 'phonenumber: введен некорректный номер телефона'}, status=status.HTTP_204_NO_CONTENT)
+    phonenumber = phonenumbers.parse(data['phonenumber'], region='Russia')
 
     order = Order.objects.create(
         address=address,
@@ -123,11 +136,8 @@ def register_order(request):
     for product in data['products']:
         product_id = product['product']
         quantity = product['quantity']
-        try:
-            order_product = Product.objects.get(pk=product_id)
-        except ObjectDoesNotExist:
-            return Response({'error': f'products: недопустимый первичный ключ {product_id}'}, status=status.HTTP_204_NO_CONTENT)
-        possition = OrderProducts.objects.get_or_create(
+        order_product = Product.objects.get(pk=product_id)
+        OrderProducts.objects.get_or_create(
             order=order,
             product=order_product,
             quantity=quantity,
