@@ -92,7 +92,7 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders_qset = Order.objects.all()
+    orders_qset = Order.detail.fetch_cost()
     orders = []
     for order_qset in orders_qset:
         order = {}
@@ -100,8 +100,8 @@ def view_orders(request):
         order['client'] = f'{order_qset.name} {order_qset.surname}'
         order['phone'] = order_qset.phone
         order['address'] = order_qset.address
+        order['cost'] = order_qset.cost
         orders.append(order)
-    
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
     })

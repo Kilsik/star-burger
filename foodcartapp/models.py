@@ -1,7 +1,13 @@
 from django.db import models
+from django.db.models import F, Sum
 from django.core.validators import MinValueValidator
 
 from phonenumber_field.modelfields import PhoneNumberField
+
+
+class OrderManager(models.QuerySet):
+    def fetch_cost(self):
+        return self.annotate(cost=Sum(F('products__product__price')*F('products__quantity')))
 
 
 class Restaurant(models.Model):
@@ -150,6 +156,8 @@ class Order(models.Model):
         'телефон',
         region='RU',
     )
+
+    detail = OrderManager.as_manager()
 
     class Meta:
         verbose_name = 'Заказ'
