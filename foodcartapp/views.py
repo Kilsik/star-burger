@@ -129,7 +129,7 @@ def register_order(request):
     last_name = data['lastname']
     phonenumber = phonenumbers.parse(data['phonenumber'], region='Russia')
 
-    order = Order.objects.create(
+    order = Order.detail.create(
         address=address,
         name=first_name,
         surname=last_name,
@@ -144,6 +144,7 @@ def register_order(request):
             order=order,
             product=order_product,
             quantity=quantity,
+            cost=order_product.price * quantity,
         )
     print(data)
     print(serializer.data)

@@ -1,3 +1,4 @@
+from typing import Any
 from django.contrib import admin
 from django.shortcuts import reverse
 from django.templatetags.static import static
@@ -129,3 +130,9 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderProductsInline
     ]
+
+@admin.register(OrderProducts)
+class OrderProductsAdmin(admin.ModelAdmin):
+    def save_model(self, request: Any, obj: Any, form: Any, change: Any):
+        obj.cosr = obj.product.price * obj.quantity
+        return super().save_model(request, obj, form, change)
