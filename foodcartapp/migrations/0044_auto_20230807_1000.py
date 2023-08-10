@@ -4,6 +4,18 @@ from django.db import migrations, models
 import django.db.models.manager
 
 
+def insert_cost(apps, schema_editor):
+    Order = apps.get_model('foodcartapp', 'OrderProducts')
+    for order in Order.objects.all():
+        product_price = order.product.price
+        order.cost = product_price * order.quantity
+        order.save()
+
+
+def pass_code(apps, schema_editor):
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -20,11 +32,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='orderproducts',
             name='cost',
-            field=models.DecimalField(decimal_places=2, default=300, max_digits=8, verbose_name='Сумма по позиции заказа'),
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                max_digits=8,
+                verbose_name='Сумма по позиции заказа'
+            ),
             preserve_default=False,
         ),
-        migrations.RunSQL(
-            sql=[("UPDATE OrderProducts AS op SET cost=product.price*op.quantity WHERE op.product=produck.pk and op.cost is null")],
-            reverse_sql=[("ALTER TABLE OrderProducts DROP COLUMN cost")]
+        migrations.RunPython(
+            code=insert_cost,
+            reverse_code=pass_code,
         )
     ]
