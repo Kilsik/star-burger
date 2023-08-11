@@ -1,13 +1,14 @@
-import json
+# import json
 import phonenumbers
 
+from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
-from django.core.exceptions import ObjectDoesNotExist
-from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework.renderers import JSONRenderer
+# from django.core.exceptions import ObjectDoesNotExist
+# from phonenumber_field.phonenumber import PhoneNumber
+# from rest_framework.renderers import JSONRenderer
 from rest_framework.decorators import api_view
-from rest_framework import status
+# from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
@@ -129,24 +130,23 @@ def register_order(request):
     last_name = data['lastname']
     phonenumber = phonenumbers.parse(data['phonenumber'], region='Russia')
 
-    order = Order.detail.create(
-        address=address,
-        name=first_name,
-        surname=last_name,
-        phone=phonenumber
-    )
-    serializer = OrderSerializer(order)
-    for product in data['products']:
-        product_id = product['product']
-        quantity = product['quantity']
-        order_product = Product.objects.get(pk=product_id)
-        OrderProducts.objects.get_or_create(
-            order=order,
-            product=order_product,
-            quantity=quantity,
-            cost=order_product.price * quantity,
+    with transaction.atomic():
+        order = Order.detail.create(
+            address=address,
+            name=first_name,
+            surname=last_name,
+            phone=phonenumber
         )
-    print(data)
-    print(serializer.data)
-    content = JSONRenderer().render(serializer.data)
+        serializer = OrderSerializer(order)
+        for product in data['products']:
+            product_id = product['product']
+            quantity = product['quantity']
+            order_product = Product.objects.get(pk=product_id)
+            OrderProducts.objects.get_or_create(
+                order=order,
+                product=order_product,
+                quantity=quantity,
+                cost=order_product.price * quantity,
+            )
+    # content = JSONRenderer().render(serializer.data)
     return Response(serializer.data)
