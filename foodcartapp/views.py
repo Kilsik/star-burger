@@ -4,11 +4,7 @@ import phonenumbers
 from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
-# from django.core.exceptions import ObjectDoesNotExist
-# from phonenumber_field.phonenumber import PhoneNumber
-# from rest_framework.renderers import JSONRenderer
 from rest_framework.decorators import api_view
-# from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
@@ -148,5 +144,4 @@ def register_order(request):
                 quantity=quantity,
                 cost=order_product.price * quantity,
             )
-    # content = JSONRenderer().render(serializer.data)
     return Response(serializer.data)
