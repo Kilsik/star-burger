@@ -1,6 +1,8 @@
 from typing import Any
 from django.contrib import admin
-from django.shortcuts import reverse
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
+from django.shortcuts import reverse, redirect
 from django.templatetags.static import static
 from django.utils.html import format_html
 
@@ -130,6 +132,13 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderProductsInline
     ]
+
+    def response_change(self, request, obj):
+        if 'link_back' in request.GET:
+            return redirect(request.GET['link_back'])
+        else:
+            return super().response_change(request, obj)
+
 
 @admin.register(OrderProducts)
 class OrderProductsAdmin(admin.ModelAdmin):
