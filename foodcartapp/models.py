@@ -149,6 +149,7 @@ class Order(models.Model):
         choices=STATUS_CHOICE,
         verbose_name='Статус',
         default=NEW,
+        db_index=True,
     )
     order_datetime = models.DateTimeField(
         'дата и время поступления заказа',
@@ -171,6 +172,11 @@ class Order(models.Model):
     phone = PhoneNumberField(
         'телефон',
         region='RU',
+    )
+    comment = models.TextField(
+        verbose_name='Комментарий',
+        blank=True,
+        null=True,
     )
 
     detail = OrderManager.as_manager()
