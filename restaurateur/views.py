@@ -102,6 +102,7 @@ def view_orders(request):
         order['address'] = order_qset.address
         order['cost'] = order_qset.order_cost
         orders.append(order)
+    print(request.path)
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
     })
