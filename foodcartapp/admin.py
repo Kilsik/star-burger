@@ -123,6 +123,7 @@ class OrderAdmin(admin.ModelAdmin):
         'address',
         'name',
         'surname',
+        'status',
     ]
     search_fields = [
         'address',
@@ -132,6 +133,11 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderProductsInline
     ]
+    list_filter = [
+        'order_datetime',
+        'status',
+    ]
+    ordering = ['-order_datetime']
 
     def response_change(self, request, obj):
         if 'link_back' in request.GET:

@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy, reverse
@@ -92,7 +93,7 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders_qset = Order.detail.fetch_cost()
+    orders_qset = Order.detail.fetch_cost().filter(~Q(status=Order.DONE))
     orders = []
     for order_qset in orders_qset:
         order = {}
@@ -101,6 +102,7 @@ def view_orders(request):
         order['phone'] = order_qset.phone
         order['address'] = order_qset.address
         order['cost'] = order_qset.order_cost
+        order['status'] = order_qset.get_status_display()
         orders.append(order)
     print(request.path)
     return render(request, template_name='order_items.html', context={

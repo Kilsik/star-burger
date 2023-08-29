@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models import F, Sum
 from django.core.validators import MinValueValidator
-from django.db.models.query import QuerySet
 
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -11,14 +10,10 @@ class OrderManager(models.QuerySet):
         return self.annotate(order_cost=Sum(F('products__cost')))
 
 
-# class OrderManager(models.Manager):
-#     def get_queryset(self):
-#         return super().get_queryset().annotate(order_cost=Sum(F(OrderProducts.)))
-
 class Restaurant(models.Model):
     name = models.CharField(
         'название',
-        max_length=50
+        max_length=50,
     )
     address = models.CharField(
         'адрес',
@@ -139,6 +134,22 @@ class RestaurantMenuItem(models.Model):
 
 
 class Order(models.Model):
+    NEW = 'NEW'
+    PREPARE = 'PRE'
+    DELIVER = 'DLV'
+    DONE = 'DONE'
+    STATUS_CHOICE = [
+        (NEW, 'Необработанный'),
+        (PREPARE, 'Собирается'),
+        (DELIVER, 'Готов к доставке'),
+        (DONE, 'Доставлен'),
+    ]
+    status = models.CharField(
+        max_length=4,
+        choices=STATUS_CHOICE,
+        verbose_name='Статус',
+        default=NEW,
+    )
     order_datetime = models.DateTimeField(
         'дата и время поступления заказа',
         auto_now_add=True,
