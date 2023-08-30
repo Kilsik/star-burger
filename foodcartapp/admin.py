@@ -124,6 +124,7 @@ class OrderAdmin(admin.ModelAdmin):
         'name',
         'surname',
         'status',
+        'payment',
     ]
     search_fields = [
         'address',
@@ -136,6 +137,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = [
         'registrated_at',
         'status',
+        'payment',
     ]
     ordering = ['-registrated_at']
 

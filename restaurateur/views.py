@@ -103,6 +103,7 @@ def view_orders(request):
         order['address'] = order_qset.address
         order['cost'] = order_qset.order_cost
         order['status'] = order_qset.get_status_display()
+        order['payment'] = order_qset.get_payment_display()
         order['comment'] = order_qset.comment
         orders.append(order)
     print(request.path)

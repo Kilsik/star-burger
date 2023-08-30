@@ -145,11 +145,24 @@ class Order(models.Model):
         (DELIVER, 'Готов к доставке'),
         (DONE, 'Доставлен'),
     ]
+    ELECTRONIC = 'EL'
+    CASH = 'CASH'
+    PAYMENT = [
+        (ELECTRONIC, 'Электронно'),
+        (CASH, 'Наличностью'),
+    ]
     status = models.CharField(
         max_length=4,
         choices=STATUS_CHOICE,
         verbose_name='Статус',
         default=NEW,
+        db_index=True,
+    )
+    payment = models.CharField(
+        max_length=4,
+        choices=PAYMENT,
+        verbose_name='Способ оплаты',
+        default=CASH,
         db_index=True,
     )
     registrated_at = models.DateTimeField(
