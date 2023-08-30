@@ -119,7 +119,7 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
-        'order_datetime',
+        'registrated_at',
         'address',
         'name',
         'surname',
@@ -134,10 +134,10 @@ class OrderAdmin(admin.ModelAdmin):
         OrderProductsInline
     ]
     list_filter = [
-        'order_datetime',
+        'registrated_at',
         'status',
     ]
-    ordering = ['-order_datetime']
+    ordering = ['-registrated_at']
 
     def response_change(self, request, obj):
         if 'link_back' in request.GET:

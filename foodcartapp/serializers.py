@@ -6,7 +6,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             'id',
-            'order_datetime',
+            'registrated_at',
             'address',
             'name',
             'surname',

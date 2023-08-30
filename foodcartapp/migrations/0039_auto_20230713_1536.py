@@ -16,7 +16,6 @@ class Migration(migrations.Migration):
             name='Order',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order_datetime', models.DateTimeField(auto_now=True, verbose_name='дата и время поступления заказа')),
                 ('address', models.CharField(db_index=True, max_length=300, verbose_name='адрес')),
                 ('name', models.CharField(max_length=100, verbose_name='имя')),
                 ('surname', models.CharField(blank=True, max_length=200, verbose_name='фамилия')),
