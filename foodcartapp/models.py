@@ -140,9 +140,9 @@ class Order(models.Model):
     DELIVER = 'DLV'
     DONE = 'DONE'
     STATUS_CHOICE = [
-        (NEW, 'Необработанный'),
-        (PREPARE, 'Собирается'),
-        (DELIVER, 'Готов к доставке'),
+        (NEW, 'Необработан'),
+        (PREPARE, 'Готовится'),
+        (DELIVER, 'Доставляется'),
         (DONE, 'Доставлен'),
     ]
     ELECTRONIC = 'EL'
@@ -155,7 +155,6 @@ class Order(models.Model):
         max_length=4,
         choices=STATUS_CHOICE,
         verbose_name='Статус',
-        default=NEW,
         db_index=True,
     )
     payment = models.CharField(
@@ -203,15 +202,22 @@ class Order(models.Model):
         blank=True,
         null=True,
     )
+    prepared_by = models.ForeignKey(
+        Restaurant,
+        verbose_name='Готовит',
+        related_name='orders',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
 
+    objects = models.Manager()
     detail = OrderManager.as_manager()
 
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
-#        ordering = ['-order_datetime']
         indexes = [
-#            models.Index(fields=['-order_datetime']),
             models.Index(fields=['phone']),
         ]
 
@@ -240,7 +246,7 @@ class OrderProducts(models.Model):
         max_digits=8,
         decimal_places=2,
     )
-
+    
     class Meta:
         verbose_name = 'пункт заказа'
         verbose_name_plural = 'пункты заказа'

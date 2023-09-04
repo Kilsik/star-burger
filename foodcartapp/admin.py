@@ -22,6 +22,11 @@ class RestaurantMenuItemInline(admin.TabularInline):
 class OrderProductsInline(admin.TabularInline):
     model = OrderProducts
     extra = 1
+    
+
+class RestaurantInline(admin.TabularInline):
+    model = Restaurant
+    extra = 0
 
 
 @admin.register(Restaurant)
@@ -132,7 +137,7 @@ class OrderAdmin(admin.ModelAdmin):
         'surname',
     ]
     inlines = [
-        OrderProductsInline
+        OrderProductsInline,
     ]
     list_filter = [
         'registrated_at',
