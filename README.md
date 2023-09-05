@@ -54,10 +54,12 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-Определите переменную окружения `SECRET_KEY`. Создать файл `.env` в каталоге `star_burger/` и положите туда такой код:
+Определите переменную окружения `SECRET_KEY` и `GEO_KEY`. Создать файл `.env` в каталоге `star_burger/` и положите туда такой код:
 ```sh
 SECRET_KEY=django-insecure-0if40nf4nf93n4
+GEO_KEY=ЗНАЧЕНИЕ
 ```
+Ключь `GEO_KEY`  является ключом к сервису Яндекса "JavaScript API и HTTP Геокодер" и его можно получить в (кабинете разработчика)[https://developer.tech.yandex.ru/services]
 
 Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
 

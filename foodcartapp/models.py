@@ -156,6 +156,7 @@ class Order(models.Model):
         choices=STATUS_CHOICE,
         verbose_name='Статус',
         db_index=True,
+        default=NEW,
     )
     payment = models.CharField(
         max_length=4,
@@ -224,6 +225,14 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.name} {self.surname} - {self.address}'
 
+    def get_status(self):
+        if self.delivered_at:
+            return Order.DONE
+        if self.prepared_by:
+            return Order.PREPARE
+        else:
+            return Order.NEW
+        
 
 class OrderProducts(models.Model):
     order = models.ForeignKey(

@@ -1,5 +1,5 @@
 from django import forms
-from django.db.models import Q, F
+from django.db.models import Q, F, OuterRef, Subquery
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
@@ -9,7 +9,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 
 
-from foodcartapp.models import Product, Restaurant, Order
+from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
+from .geo import calc_distances
 
 
 class Login(forms.Form):
@@ -98,8 +99,6 @@ def view_orders(request):
     orders_qset = Order.detail.fetch_cost().filter(~Q(status=Order.DONE))
     orders = []
     for order_qset in orders_qset:
-        if order_qset.prepared_by:
-            order_qset.status = Order.PREPARE
         order = {}
         order['id'] = order_qset.pk
         order['client'] = f'{order_qset.name} {order_qset.surname}'
@@ -109,16 +108,19 @@ def view_orders(request):
         order['status'] = order_qset.get_status_display()
         order['payment'] = order_qset.get_payment_display()
         order['comment'] = order_qset.comment
-        products = order_qset.products.all().prefetch_related('product__menu_items__restaurant')\
-            .filter(product__menu_items__availability=True).distinct()
-        restaurants = Restaurant.objects.all()
-        for product in products:
-            menu_items = product.product.menu_items.values_list(F('restaurant_id'))
-            restaurants = restaurants.filter(id__in=menu_items)
-        order['restaurants'] = restaurants if restaurants else 'Ошибка определения координат'
-        order['prepared'] = order_qset.prepared_by
+        if order_qset.prepared_by:
+            order['prepared'] = order_qset.prepared_by
+            order['restaurants'] = ''
+        else:
+            products = order_qset.products.all()
+            restaurants = Restaurant.objects.all()
+            for product in products:
+                # print(product.res)
+                menu_items = product.product.menu_items.values_list(F('restaurant_id'))
+                restaurants = restaurants.filter(id__in=menu_items)
+            order['restaurants'] = calc_distances(restaurants, order['address'])
+            order['prepared'] = ''
         orders.append(order)
-        # print(order['restaurants'])
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
     })

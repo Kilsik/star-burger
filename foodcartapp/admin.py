@@ -1,5 +1,7 @@
 from typing import Any
 from django.contrib import admin
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
 from django.shortcuts import reverse, redirect
@@ -12,6 +14,11 @@ from .models import Restaurant
 from .models import RestaurantMenuItem
 from .models import Order
 from .models import OrderProducts
+
+
+@receiver(pre_save, sender=Order)
+def chage_status(sender, instance, **kwargs):
+    instance.status = instance.get_status()
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
