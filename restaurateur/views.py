@@ -10,7 +10,7 @@ from django.contrib.auth import views as auth_views
 
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
-from .geo import calc_distances
+from geoposition.views import calc_distances
 
 
 class Login(forms.Form):
@@ -96,7 +96,7 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders_qset = Order.detail.fetch_cost().filter(~Q(status=Order.DONE))
+    orders_qset = Order.detail.fetch_cost().filter(~Q(status=Order.DONE)).prefetch_related('products')
     orders = []
     for order_qset in orders_qset:
         order = {}
@@ -115,7 +115,6 @@ def view_orders(request):
             products = order_qset.products.all()
             restaurants = Restaurant.objects.all()
             for product in products:
-                # print(product.res)
                 menu_items = product.product.menu_items.values_list(F('restaurant_id'))
                 restaurants = restaurants.filter(id__in=menu_items)
             order['restaurants'] = calc_distances(restaurants, order['address'])
