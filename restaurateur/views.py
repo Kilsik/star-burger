@@ -101,8 +101,8 @@ def view_orders(request):
     for order_qset in orders_qset:
         order = {}
         order['id'] = order_qset.pk
-        order['client'] = f'{order_qset.name} {order_qset.surname}'
-        order['phone'] = order_qset.phone
+        order['client'] = f'{order_qset.firstname} {order_qset.lastname}'
+        order['phone'] = order_qset.phonenumber
         order['address'] = order_qset.address
         order['cost'] = order_qset.order_cost
         order['status'] = order_qset.get_status_display()

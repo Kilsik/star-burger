@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import F, Sum
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
 from phonenumber_field.modelfields import PhoneNumberField
@@ -185,23 +185,23 @@ class Order(models.Model):
         max_length=300,
         db_index=True,
     )
-    name = models.CharField(
+    firstname = models.CharField(
         'имя',
         max_length=100,
     )
-    surname = models.CharField(
+    lastname = models.CharField(
         'фамилия',
         max_length=200,
         blank=True,
     )
-    phone = PhoneNumberField(
+    phonenumber = PhoneNumberField(
         'телефон',
-        region='RU',
+        max_length=12,
+        db_index=True,
     )
     comment = models.TextField(
         verbose_name='Комментарий',
         blank=True,
-        null=True,
     )
     prepared_by = models.ForeignKey(
         Restaurant,
@@ -219,11 +219,11 @@ class Order(models.Model):
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
         indexes = [
-            models.Index(fields=['phone']),
+            models.Index(fields=['phonenumber']),
         ]
 
     def __str__(self):
-        return f'{self.name} {self.surname} - {self.address}'
+        return f'{self.firstname} {self.lastname} - {self.address}'
 
     def get_status(self):
         if self.delivered_at:
@@ -249,13 +249,15 @@ class OrderProducts(models.Model):
     )
     quantity = models.PositiveIntegerField(
         'количество',
+        validators=[MaxValueValidator(100)],
     )
     cost = models.DecimalField(
         verbose_name='Сумма по позиции заказа',
         max_digits=8,
         decimal_places=2,
+        validators=[MinValueValidator(0)],
     )
-    
+
     class Meta:
         verbose_name = 'пункт заказа'
         verbose_name_plural = 'пункты заказа'

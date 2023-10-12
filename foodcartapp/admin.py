@@ -133,15 +133,15 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'registrated_at',
         'address',
-        'name',
-        'surname',
+        'firstname',
+        'lastname',
         'status',
         'payment',
     ]
     search_fields = [
         'address',
-        'name',
-        'surname',
+        'firstname',
+        'lastname',
     ]
     inlines = [
         OrderProductsInline,
