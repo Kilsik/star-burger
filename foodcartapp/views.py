@@ -73,8 +73,7 @@ def register_order(request):
     serializer = OrderSerializer(data=data)
     serializer.is_valid()
     with transaction.atomic():
-        order = serializer.save()
-        print(data)
+        serializer.save()
         # for product in data['products']:
         #     product_id = product['product']
         #     quantity = product['quantity']

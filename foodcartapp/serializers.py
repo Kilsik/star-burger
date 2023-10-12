@@ -28,10 +28,9 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         order_products = validated_data.pop('products')
-        order = Order.objects.create(validated_data)
+        order = Order.objects.create(**validated_data)
         for order_product in order_products:
             cost = order_product['quantity'] * order_product['product'].price
-            # product['cost'] = cost
             OrderProducts.objects.create(order=order,
                                          **order_product,
                                          cost=cost)
