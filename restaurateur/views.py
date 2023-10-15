@@ -1,5 +1,5 @@
 from django import forms
-from django.db.models import Q, F, OuterRef, Subquery
+from django.db.models import Q, F
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
@@ -10,7 +10,6 @@ from django.contrib.auth import views as auth_views
 
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
-from foodcartapp.serializers import OrderSerializer, OrderDisplaySerializer
 from geoposition.views import calc_distances
 
 
@@ -109,36 +108,25 @@ def view_orders(request):
     orders_qset = Order.detail.fetch_cost().filter(~Q(status=Order.DONE)).prefetch_related('products')
     orders = []
     for order_qset in orders_qset:
-        serializer = OrderDisplaySerializer(order_qset)
-        # , data={
-        #     'id': order_qset.pk,
-        #     'status': order_qset.get_status_display(),
-        #     'payment': order_qset.get_payment_display(),
-        #     'prepared': order_qset.prepared_by,
-        #     'restaurants': get_restaurants(order_qset),
-        # })
-        # serializer.is_valid()
-        print(serializer.data)
-        order = {}
-        order['id'] = order_qset.pk
-        order['client'] = f'{order_qset.firstname} {order_qset.lastname}'
-        order['phone'] = order_qset.phonenumber
-        order['address'] = order_qset.address
-        order['cost'] = order_qset.order_cost
-        order['status'] = order_qset.get_status_display()
-        order['payment'] = order_qset.get_payment_display()
-        order['comment'] = order_qset.comment
-        if order_qset.prepared_by:
-            order['prepared'] = order_qset.prepared_by
-            order['restaurants'] = ''
-        else:
+        if not order_qset.prepared_by:
             products = order_qset.products.all()
             restaurants = Restaurant.objects.all()
             for product in products:
                 menu_items = product.product.menu_items.values_list(F('restaurant_id'))
                 restaurants = restaurants.filter(id__in=menu_items)
-            order['restaurants'] = calc_distances(restaurants, order['address'])
-            order['prepared'] = ''
+
+        order = {
+            'id': order_qset.pk,
+            'client': f'{order_qset.firstname} {order_qset.lastname}',
+            'phone': order_qset.phonenumber,
+            'address': order_qset.address,
+            'cost': order_qset.order_cost,
+            'status': order_qset.get_status_display(),
+            'payment': order_qset.get_payment_display(),
+            'comment': order_qset.comment,
+            'prepared': order_qset.prepared_by,
+            'restaurants': calc_distances(restaurants, order_qset.address),
+        }
         orders.append(order)
     return render(request, template_name='order_items.html', context={
         'order_items': orders,

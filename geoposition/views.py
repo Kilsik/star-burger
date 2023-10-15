@@ -47,5 +47,3 @@ def calc_distances(restaurants, address):
              'distance': delivery_distance}
         )
     return sorted(with_distance, key=lambda d: d['distance'])
-
-

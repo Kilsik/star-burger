@@ -1,40 +1,5 @@
 from rest_framework import serializers
-from phonenumber_field.modelfields import PhoneNumberField
-from .models import Order, OrderProducts, Product
-
-
-class RestaurantSerializer():
-    name = serializers.CharField()
-    address = serializers.CharField()
-
-
-class MenuItemSerializer(serializers.Serializer):
-    restaurant = RestaurantSerializer()
-
-
-class ProductSerializer(serializers.Serializer):
-    menu_items = MenuItemSerializer()
-
-
-class ProductDisplaySerializer(serializers.Serializer):
-    quantity = serializers.IntegerField()
-    cost = serializers.DecimalField(max_digits=8, decimal_places=2)
-    product = ProductSerializer()
-
-
-class OrderDisplaySerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    firstname = serializers.CharField()
-    lastname = serializers.CharField()
-    phonenumber = serializers.CharField()
-    address = serializers.CharField()
-    status = serializers.CharField()
-    payment = serializers.CharField()
-    comment = serializers.CharField()
-    products = ProductDisplaySerializer(many=True)
-
-    class Meta:
-        depth = 5
+from .models import Order, OrderProducts
 
 
 class OrderProductsSerializer(serializers.ModelSerializer):
