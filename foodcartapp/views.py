@@ -74,14 +74,4 @@ def register_order(request):
     serializer.is_valid()
     with transaction.atomic():
         serializer.save()
-        # for product in data['products']:
-        #     product_id = product['product']
-        #     quantity = product['quantity']
-        #     order_product = Product.objects.get(pk=product_id)
-        #     OrderProducts.objects.get_or_create(
-        #         order=order,
-        #         product=order_product,
-        #         quantity=quantity,
-        #         cost=order_product.price * quantity,
-            # )
     return Response(serializer.data)

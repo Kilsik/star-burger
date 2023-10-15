@@ -10,8 +10,18 @@ from django.contrib.auth import views as auth_views
 
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
+from foodcartapp.serializers import OrderSerializer, OrderDisplaySerializer
 from geoposition.views import calc_distances
 
+
+def get_restaurants(order):
+    if order.prepared_by:
+        return ''
+    restaurants = Restaurant.objects.all()
+    for product in order.products.all():
+        menu_items = product.product.menu_items.values_list(F('restaurant_id'))
+        restaurants = restaurants.filter(id__in=menu_items)
+    return calc_distances(restaurants, order.address)
 
 class Login(forms.Form):
     username = forms.CharField(
@@ -99,6 +109,16 @@ def view_orders(request):
     orders_qset = Order.detail.fetch_cost().filter(~Q(status=Order.DONE)).prefetch_related('products')
     orders = []
     for order_qset in orders_qset:
+        serializer = OrderDisplaySerializer(order_qset)
+        # , data={
+        #     'id': order_qset.pk,
+        #     'status': order_qset.get_status_display(),
+        #     'payment': order_qset.get_payment_display(),
+        #     'prepared': order_qset.prepared_by,
+        #     'restaurants': get_restaurants(order_qset),
+        # })
+        # serializer.is_valid()
+        print(serializer.data)
         order = {}
         order['id'] = order_qset.pk
         order['client'] = f'{order_qset.firstname} {order_qset.lastname}'
