@@ -8,7 +8,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 class OrderManager(models.QuerySet):
     def fetch_cost(self):
-        return self.annotate(order_cost=Sum(F('products__cost')))
+        return self.annotate(order_cost=Sum(F('products__cost')*F('products__quantity')))
 
 
 class Restaurant(models.Model):
@@ -249,10 +249,11 @@ class OrderProducts(models.Model):
     )
     quantity = models.PositiveIntegerField(
         'количество',
-        validators=[MaxValueValidator(100)],
+        validators=[MaxValueValidator(100),
+                    MinValueValidator(1)],
     )
     cost = models.DecimalField(
-        verbose_name='Сумма по позиции заказа',
+        verbose_name='Цена продукта',
         max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0)],

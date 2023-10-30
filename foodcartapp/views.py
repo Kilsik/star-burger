@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
-from .models import Product, Order, OrderProducts
+from .models import Product
 from .serializers import OrderSerializer
 
 
@@ -66,12 +66,7 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
-    try:
-        data = request.data
-    except ValueError as err:
-        raise ValidationError(f'Произошла ошибка {err}')
-    serializer = OrderSerializer(data=data)
-    serializer.is_valid()
-    with transaction.atomic():
-        serializer.save()
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
     return Response(serializer.data)
